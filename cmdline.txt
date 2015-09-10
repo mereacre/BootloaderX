@@ -1,0 +1,2 @@
+node ser2tcp.js
+socat UNIX-CONNECT:/tmp/com2_sock TCP-LISTEN:13377
