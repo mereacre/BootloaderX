@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>BA82B188-7B98-46FE-BCEF-E76DAE0C71D6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>SerialComm</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>FE479B9263026F92CED088CF5ACFBFFDE30EC4B1</key>
+		<string>https://github.com/mereacre/BootloaderX.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>SerialComm/SerialComm.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>FE479B9263026F92CED088CF5ACFBFFDE30EC4B1</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/mereacre/BootloaderX.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>FE479B9263026F92CED088CF5ACFBFFDE30EC4B1</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FE479B9263026F92CED088CF5ACFBFFDE30EC4B1</string>
+			<key>IDESourceControlWCCName</key>
+			<string>BootloaderX</string>
+		</dict>
+	</array>
+</dict>
+</plist>
