@@ -179,6 +179,22 @@ int EraseFlash(void)
     return 1;
 }
 
+int ExecuteApp(void)
+{
+    ssize_t nRecBytes = 0;
+    
+    gSendBuf[0] = 0x45;  // Character "E"
+    WriteToPort(&gftHandle, 1, &gSendBuf[0]);
+    nRecBytes = ReadSeriaData(0, MAX_BUF_SIZE);
+    
+    if (nRecBytes!=1 || gRecBuf[0]!=0x0D) {
+        printf("Couldn't execute APP\n");
+        return 0;
+    }
+    
+    return 1;
+}
+
 int main(int argc, const char * argv[]) {
     struct  termios oldTio;
     auto portPathName = DEFAULT_PORT_PATH_NAME;
@@ -193,6 +209,7 @@ int main(int argc, const char * argv[]) {
         std::cout << "[cmd]:" << std::endl;
         std::cout << "-p programm" << std::endl;
         std::cout << "-e erase" << std::endl;
+        std::cout << "-E execute App" << std::endl;
         std::cout << "Example: SerialComm -p /dev/tty.usbserial-FTWOHPEA HexFile.hex" << std::endl;
         return 1;
     } else {
@@ -201,6 +218,8 @@ int main(int argc, const char * argv[]) {
             cmdType = 1;
         else if (!strcmp(cmdStr, "-e"))
             cmdType = 2;
+        else if (!strcmp(cmdStr, "-E"))
+            cmdType = 3;
         portPathName = argv[2];
         hexFilePath = (char*)argv[3];
     }
@@ -326,6 +345,10 @@ int main(int argc, const char * argv[]) {
         } else if (cmdType==2){
             printf("Erasing Device application FLASH section...\n");
             EraseFlash();
+            printf("Done\n");
+        } else if(cmdType==3){
+            printf("Starting execution of the FLASH APP...\n");
+            ExecuteApp();
             printf("Done\n");
         }
     }
