@@ -12,4 +12,5 @@
 #define DEFAULT_PORT_PATH_NAME "/dev/tty.usbserial-FTWOHPEA"
 #define MAX_BUF_SIZE    1024
 #define PAGE_SIZE_BYTES 512
+#define LIMIT_BASE_ADDRESS 0xFFFF
 #endif
