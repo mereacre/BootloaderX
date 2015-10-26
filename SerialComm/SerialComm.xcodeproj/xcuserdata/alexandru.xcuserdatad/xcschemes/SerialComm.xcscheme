@@ -64,11 +64,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/dev/tty.SLAB_USBtoUART"
+            argument = "/dev/tty.usbserial-FTWOHPEA"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "USARTAPP.hex"
+            argument = "APPSen.hex"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

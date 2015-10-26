@@ -38,8 +38,8 @@ void SetDefaultPortSettings(int *portHandle, struct termios  *tio)
     newtio.c_cc[VMIN]=1;
     newtio.c_cc[VTIME]=0;
     
-    cfsetospeed(&newtio,B9600);
-    cfsetispeed(&newtio,B9600);
+    cfsetospeed(&newtio,B115200);
+    cfsetispeed(&newtio,B115200);
     
     tcflush(*portHandle, TCIOFLUSH);
     tcsetattr(*portHandle,TCSANOW,&newtio);
