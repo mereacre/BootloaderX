@@ -292,7 +292,6 @@ void USART_DataRegEmpty(USART_data_t * usart_data)
  */
 bool USART_GetByte_Timeout(USART_t * usart, uint16_t timeout, uint8_t *pdata)
 {
-	uint16_t timeout_reg = 0;
 	uint32_t ms_old_time, ms_time;
 
 	RTC_GetCurrentTime(&ms_old_time);

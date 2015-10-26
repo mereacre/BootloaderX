@@ -37,9 +37,12 @@ SUBDIRS :=
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
+../clksys_driver.c \
 ../main.c \
 ../nvm.c \
-../serial.c
+../rtc_driver.c \
+../serial.c \
+../usart_driver.c
 
 
 PREPROCESSING_SRCS +=  \
@@ -52,31 +55,43 @@ ASM_SRCS +=
 
 OBJS +=  \
 ccp.o \
+clksys_driver.o \
 main.o \
 nvm.o \
 nvm_asm.o \
-serial.o
+rtc_driver.o \
+serial.o \
+usart_driver.o
 
 OBJS_AS_ARGS +=  \
 ccp.o \
+clksys_driver.o \
 main.o \
 nvm.o \
 nvm_asm.o \
-serial.o
+rtc_driver.o \
+serial.o \
+usart_driver.o
 
 C_DEPS +=  \
 ccp.d \
+clksys_driver.d \
 main.d \
 nvm.d \
 nvm_asm.d \
-serial.d
+rtc_driver.d \
+serial.d \
+usart_driver.d
 
 C_DEPS_AS_ARGS +=  \
 ccp.d \
+clksys_driver.d \
 main.d \
 nvm.d \
 nvm_asm.d \
-serial.d
+rtc_driver.d \
+serial.d \
+usart_driver.d
 
 OUTPUT_FILE_PATH +=BootloaderX.elf
 
@@ -92,6 +107,12 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
+
+
 
 
 

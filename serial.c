@@ -45,8 +45,9 @@
 *****************************************************************************/
 
 #include "defines.h"
+#include "usart_driver.h"
 
-/*! \brief Initializing UART communcation.
+/*! \brief Initializing UART communication.
 *
 *  This function initializes the UART communication with generic parameters as mentioned below. 
 *  Both Enabling both TRASMISSION and RECEPTION
@@ -57,13 +58,14 @@
 void initbootuart(void)
 {
    	// USART, 8 Data bits, No Parity, 1 Stop bit, 9600 baudrate
-    USART_Port_Enable(&USART_PORT);
-    USART_Format_Set(&USART, USART_CHSIZE_8BIT_gc, USART_PMODE_DISABLED_gc, false);
-    USART_Baudrate_Set(&USART, BSEL_VALUE, 0);
-    USART_Rx_Enable(&USART);
-    USART_Tx_Enable(&USART);
 
-    /*
+	USART_Port_Enable(&USART_PORT);
+    USART_Format_Set(&USART, USART_CHSIZE_8BIT_gc, USART_PMODE_DISABLED_gc, 0);
+    USART_Baudrate_Set(&USART, BSEL_VALUE, BSCALE_VALUE);
+    USART_Rx_Enable(&USART);
+    USART_Tx_Enable(&USART);	
+    
+	/*
     UART_PORT.DIRSET |= UART_TX_PIN;
    BAUD_RATE_LOW_REG = BRREG_VALUE;
    UART_CONTROL_REG = (1 << ENABLE_RECEIVER_BIT) |
@@ -81,13 +83,15 @@ void initbootuart(void)
 */
 void sendchar(unsigned char c)
 { 
-    while( !USART_IsTXDataRegisterEmpty(&USART) ) {}
+    
+	while( !USART_IsTXDataRegisterEmpty(&USART) ) {}
     USART_PutChar(&USART,c);
     
+	
     /*
     UART_DATA_REG = c; // prepare transmission
    while (!(UART_STATUS_REG & (1 << TRANSMIT_COMPLETE_BIT)));
-   // wait until byte sendt
+   // wait until byte send
    UART_STATUS_REG |= (1 << TRANSMIT_COMPLETE_BIT); // delete TXCflag
     */
 }
@@ -105,13 +109,15 @@ unsigned char recchar(void)
 {
     unsigned char ret;
     
+	
     while( !USART_IsRXComplete(&USART) ){}
     ret = USART_GetChar(&USART);
-    
+   
+	
    /*
     while(!(UART_STATUS_REG & (1 << RECEIVE_COMPLETE_BIT)));  // wait for data
    ret = UART_DATA_REG;
-    */
+   */
    return ret;
 }
 

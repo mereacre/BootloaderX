@@ -221,16 +221,10 @@ int main(void)
    
    // Configure 32KHz OSC
    CLKSYS_Enable( OSC_RC32KEN_bm );
-   do {} while ( CLKSYS_IsReady( OSC_RC32KEN_bm ) == 0 );
-    
-   /*  Enable internal 32 MHz rc oscillator and wait until it's
-   *  stable. Set the 32 MHz rc oscillator as the main clock source.
-   *  Then disable other oscillators.
-   */
+   do {} while ( CLKSYS_IsReady( OSC_RC32KEN_bm ) == 0 );    
    CLKSYS_Enable( OSC_RC32MEN_bm );
    do {} while ( CLKSYS_IsReady( OSC_RC32MRDY_bm ) == 0 );
    CLKSYS_Main_ClockSource_Select( CLK_SCLKSEL_RC32M_gc );
-   //CLKSYS_Disable( OSC_RC32MEN_bm | OSC_RC32KEN_bm );
    CLKSYS_Disable( OSC_RC2MEN_bm);
    CLKSYS_AutoCalibration_Enable( OSC_RC32MCREF0_bm, true );
    
