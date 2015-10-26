@@ -30,10 +30,13 @@
 
 #include "SerialPort.h"
 #include "defines.h"
+#include "HexFile.h"
 
 int             gftHandle = -1;
 struct pollfd   gWaitDescriptor;
 unsigned char   gSendBuf[MAX_BUF_SIZE], gRecBuf[MAX_BUF_SIZE];
+
+std::vector<HEX> hexFileData;
 
 void PrintReadBuf(unsigned short offset, int nBytes)
 {
@@ -62,10 +65,14 @@ ssize_t ReadSeriaData(unsigned short offset, int nBytes)
     
     return bytesRead;
 }
-int SetFlashAddress(unsigned short address)
+int SetFlashAddress(unsigned int address)
 {
     ssize_t nRecBytes = 0;
     
+    if(address>LIMIT_BASE_ADDRESS) {
+        printf("Address %X exceeds the limit\n", address);
+        return 0;
+    }
     gSendBuf[0] = 0x41;  // Character "A"
     gSendBuf[1] = (unsigned char) ((address>>8) & 0xFF);
     gSendBuf[2] = (unsigned char) (address & 0xFF);
@@ -81,7 +88,7 @@ int SetFlashAddress(unsigned short address)
     return 1;
 }
 
-ssize_t ReadFlashPage(unsigned short address, unsigned short byteCount)
+ssize_t ReadFlashPage(unsigned int address, unsigned short byteCount)
 {
     ssize_t nRecBytes = 0;
     unsigned short byteCountRead = 0;
@@ -106,12 +113,12 @@ ssize_t ReadFlashPage(unsigned short address, unsigned short byteCount)
     }
     
     printf("Number of bytes read %d\n", byteCountRead);
-    PrintReadBuf(0, byteCountRead);
+    //PrintReadBuf(0, byteCountRead);
     
-    return nRecBytes;
+    return byteCountRead;
 }
 
-int WriteFlashPage(unsigned short address, unsigned short byteCount, unsigned char *dataBuf)
+int WriteFlashPage(unsigned int address, unsigned short byteCount, unsigned char *dataBuf)
 {
     ssize_t nRecBytes = 0;
     
@@ -172,23 +179,56 @@ int EraseFlash(void)
     return 1;
 }
 
+int ExecuteApp(void)
+{
+    ssize_t nRecBytes = 0;
+    
+    gSendBuf[0] = 0x45;  // Character "E"
+    WriteToPort(&gftHandle, 1, &gSendBuf[0]);
+    nRecBytes = ReadSeriaData(0, MAX_BUF_SIZE);
+    
+    if (nRecBytes!=1 || gRecBuf[0]!=0x0D) {
+        printf("Couldn't execute APP\n");
+        return 0;
+    }
+    
+    return 1;
+}
+
 int main(int argc, const char * argv[]) {
     struct  termios oldTio;
     auto portPathName = DEFAULT_PORT_PATH_NAME;
+    char *hexFilePath;
+    char *cmdStr;
     ssize_t nRecBytes = 0;
+    unsigned char cmdType = 0;
     
-    if (argc<2) {
+    if (argc<4) {
         std::cout << "Not enough input arguments" << std::endl;
-        std::cout << "Use SerialComm portpath" << std::endl;
+        std::cout << "Use SerialComm [cmd] portpath hexfilepath" << std::endl;
+        std::cout << "[cmd]:" << std::endl;
+        std::cout << "-p programm" << std::endl;
+        std::cout << "-e erase" << std::endl;
+        std::cout << "-E execute App" << std::endl;
+        std::cout << "Example: SerialComm -p /dev/tty.usbserial-FTWOHPEA HexFile.hex" << std::endl;
         return 1;
-    } else
-        portPathName = argv[1];
+    } else {
+        cmdStr = (char*)argv[1];
+        if (!strcmp(cmdStr, "-p"))
+            cmdType = 1;
+        else if (!strcmp(cmdStr, "-e"))
+            cmdType = 2;
+        else if (!strcmp(cmdStr, "-E"))
+            cmdType = 3;
+        portPathName = argv[2];
+        hexFilePath = (char*)argv[3];
+    }
     
     if((gftHandle = open(portPathName, O_RDWR | O_NOCTTY | O_NONBLOCK | O_NDELAY))==-1) {
         std::cout << "Couldn't open port: "<< portPathName << std::endl;
         return 1;
     } else {
-        std::cout << "Port: " << portPathName << " opened " << std::endl;
+        std::cout << "[Port]: " << portPathName << " opened " << std::endl;
         
         SetDefaultPortSettings(&gftHandle, &oldTio);
         
@@ -200,7 +240,7 @@ int main(int argc, const char * argv[]) {
         
         nRecBytes = ReadSeriaData(0, MAX_BUF_SIZE);
         gRecBuf[nRecBytes] = '\0';
-        std::cout << "Programmer: "<< gRecBuf <<std::endl;
+        std::cout << "[Programmer]: "<< gRecBuf <<std::endl;
         
         gSendBuf[0] = 0x73;  // Character "s"
         WriteToPort(&gftHandle, 1, &gSendBuf[0]);
@@ -210,18 +250,109 @@ int main(int argc, const char * argv[]) {
             std::cout << "Wrong device signature" << std::endl;
             ClosePortDevice(&gftHandle, &oldTio);
             return 1;
-        } else printf("Device signature: %X %X %X\n", gRecBuf[0], gRecBuf[1], gRecBuf[2]);
+        } else printf("[Device signature]: %X %X %X\n", gRecBuf[0], gRecBuf[1], gRecBuf[2]);
         
         unsigned short blkSize = GetDeviceBlockSize();
-        printf("Block size: %d\n", blkSize);
+        printf("[Block size]: %d\n", blkSize);
         
-        unsigned char dataBuf[PAGE_SIZE_BYTES];
-        memset(&dataBuf[0], 0x0C, PAGE_SIZE_BYTES);
-        //EraseFlash();
-        if (WriteFlashPage(0x00, PAGE_SIZE_BYTES, &dataBuf[0]))
-            nRecBytes = ReadFlashPage(0x000, PAGE_SIZE_BYTES);
+        unsigned char loadF = 0x01;
+        
+        if (LoadHexFile(hexFilePath, &hexFileData) && cmdType==1) {
+            printf("[Hex File]: %s opened\n", hexFilePath);
+            
+            unsigned char dataBuf[PAGE_SIZE_BYTES];
+            unsigned char *memBuf = NULL, *prevMemBuf = NULL;
+            unsigned int baseAddress = 0x00, memSize = 0x00;
+            unsigned int prevAddr = 0x00;
+            
+            memset(&dataBuf[0], 0xFF, PAGE_SIZE_BYTES);
+            
+            for (int idx=0; idx<hexFileData.size(); idx++) {
+                HEX hdata =hexFileData[idx];
+                
+                if (hdata.type==0x02) {
+                    printf("Detected extended address %X\n", hdata.extendedaddress);
+                } else if (!hdata.type) {
+                    if (hdata.address && hdata.address<prevAddr) {
+                        printf("Addresses are not in sequence\n");
+                        printf("Address %X\n", hdata.address);
+                        break;
+                    } else if (hdata.address>prevAddr) {
+                        printf("Gap in the address %X\n", hdata.address);
+                        break;
+                    } else prevAddr = hdata.address+hdata.len;
+                    
+                    memBuf = (unsigned char*)realloc(prevMemBuf, hdata.address+hdata.len);
+                    
+                    if(memBuf!=NULL) {
+                        prevMemBuf = memBuf;
+                        memcpy(memBuf+hdata.address, hdata.data.data(), hdata.len);
+                        
+                        memSize = hdata.address+hdata.len;
+                    } else {
+                        printf("Couldn't allocate memory for hex data\n");
+                        if(prevMemBuf!=NULL) free(prevMemBuf);
+                        break;
+                    }
+                } else if (hdata.type==1) {
+                    if(memBuf==NULL) {
+                        printf("Reached the end of hex file\n");
+                        break;
+                    } else {
+                        int pageIdx = 0;
+                        printf("[Generating]: memory size %d, number of pages %d and remainder %d\n", memSize, memSize/PAGE_SIZE_BYTES, memSize %PAGE_SIZE_BYTES);
+                        printf("[At base address]: %X\n", baseAddress);
+                        for (pageIdx=0; pageIdx<memSize/PAGE_SIZE_BYTES; pageIdx++) {
+                            printf("Writing page %d at address %X...\n", pageIdx+1, baseAddress);
+                            if (WriteFlashPage(baseAddress>>1, PAGE_SIZE_BYTES, memBuf+pageIdx*PAGE_SIZE_BYTES)) {
+                                nRecBytes = ReadFlashPage(baseAddress>>1, PAGE_SIZE_BYTES);
+                                if (!memcmp(memBuf+pageIdx*PAGE_SIZE_BYTES, gRecBuf, PAGE_SIZE_BYTES) && nRecBytes==PAGE_SIZE_BYTES)
+                                    printf("Page written ok\n");
+                                else {
+                                    printf("Bytes read not equal to bytes written!\n");
+                                    break;
+                                }
+                            } else {
+                                printf("Page write fault\n");
+                                break;
+                            }
+                            baseAddress += PAGE_SIZE_BYTES;
+                        }
+                        
+                        printf("Writing page %d at address %X...\n", pageIdx+1, baseAddress);
+                        if (WriteFlashPage(baseAddress>>1, memSize % PAGE_SIZE_BYTES, memBuf+pageIdx*PAGE_SIZE_BYTES)) {
+                            nRecBytes = ReadFlashPage(baseAddress>>1, memSize % PAGE_SIZE_BYTES);
+                            if (!memcmp(memBuf+pageIdx*PAGE_SIZE_BYTES, gRecBuf, memSize % PAGE_SIZE_BYTES) && nRecBytes==memSize % PAGE_SIZE_BYTES)
+                                printf("Page written ok\n");
+                            else {
+                                printf("Bytes read not equal to bytes written!\n");
+                                break;
+                            }
+                        } else {
+                            printf("Page write fault\n");
+                            break;
+                        }
+                    }
+                }
+            }
+            //EraseFlash();
+            //if (WriteFlashPage(0x00, PAGE_SIZE_BYTES, &dataBuf[0]))
+            //nRecBytes = ReadFlashPage(0x000, PAGE_SIZE_BYTES);
+            if(prevMemBuf!=NULL) free(prevMemBuf);
+            
+            //if(memBuf!=NULL) free(memBuf);
+
+        } else if (cmdType==2){
+            printf("Erasing Device application FLASH section...\n");
+            EraseFlash();
+            printf("Done\n");
+        } else if(cmdType==3){
+            printf("Starting execution of the FLASH APP...\n");
+            ExecuteApp();
+            printf("Done\n");
+        }
     }
-    
+
     ClosePortDevice(&gftHandle, &oldTio);
     return 0;
 }

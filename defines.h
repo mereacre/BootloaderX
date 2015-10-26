@@ -58,7 +58,12 @@
 #define	PROG_NO		PIN4_bp
 
 /* baud rate register value calculation */
-#define	BRREG_VALUE	12 //12 = 9600bps for 2MHz clock
+#define USART               USARTD0
+#define USART_PORT          PORTD
+#define BSCALE_VALUE  		0
+#define BSEL_VALUE   		207 //9600 for 32 Mhz clock
+
+//#define	BRREG_VALUE	12 //12 = 9600bps for 2MHz clock
 
 /* definitions for UART control */
 #define UART_PORT			PORTE

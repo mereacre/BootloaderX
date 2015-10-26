@@ -60,7 +60,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/dev/tty.usbserial-FTWOHPEA"
+            argument = "-p"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/dev/tty.SLAB_USBtoUART"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "USARTAPP.hex"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

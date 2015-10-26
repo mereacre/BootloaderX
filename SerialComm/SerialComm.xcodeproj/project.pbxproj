@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		BC0B519E1BA195C8008AC0EE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC0B519D1BA195C8008AC0EE /* main.cpp */; };
 		BC0B51A61BA196BE008AC0EE /* SerialPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC0B51A41BA196BE008AC0EE /* SerialPort.cpp */; };
+		BCF2BF471BA2E8C700A3E926 /* HexFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BCF2BF461BA2E8C700A3E926 /* HexFile.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,8 @@
 		BC0B51A41BA196BE008AC0EE /* SerialPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SerialPort.cpp; sourceTree = "<group>"; };
 		BC0B51A51BA196BE008AC0EE /* SerialPort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialPort.h; sourceTree = "<group>"; };
 		BC0B51A71BA197FC008AC0EE /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defines.h; sourceTree = "<group>"; };
+		BCF2BF451BA2E68100A3E926 /* HexFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HexFile.h; sourceTree = "<group>"; };
+		BCF2BF461BA2E8C700A3E926 /* HexFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HexFile.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +68,8 @@
 				BC0B51A51BA196BE008AC0EE /* SerialPort.h */,
 				BC0B519D1BA195C8008AC0EE /* main.cpp */,
 				BC0B51A71BA197FC008AC0EE /* defines.h */,
+				BCF2BF451BA2E68100A3E926 /* HexFile.h */,
+				BCF2BF461BA2E8C700A3E926 /* HexFile.cpp */,
 			);
 			path = SerialComm;
 			sourceTree = "<group>";
@@ -125,6 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCF2BF471BA2E8C700A3E926 /* HexFile.cpp in Sources */,
 				BC0B51A61BA196BE008AC0EE /* SerialPort.cpp in Sources */,
 				BC0B519E1BA195C8008AC0EE /* main.cpp in Sources */,
 			);
@@ -240,6 +246,7 @@
 				BC0B51A31BA195C8008AC0EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
