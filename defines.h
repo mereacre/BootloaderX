@@ -53,25 +53,25 @@
 #include <stdio.h>
 
 /* define pin for enter-self-prog-mode */
-#define	PROGPORT	PORTD.OUT
-#define	PROGPIN		PORTD.IN
+#define	PROGPORT	PORTE.OUT
+#define	PROGPIN		PORTE.IN
 #define	PROG_NO		PIN4_bp
 
 /* baud rate register value calculation */
 #define	BRREG_VALUE	12 //12 = 9600bps for 2MHz clock
 
 /* definitions for UART control */
-#define UART_PORT			PORTD
+#define UART_PORT			PORTE
 #define UART_TX_PIN			PIN3_bm
-#define	BAUD_RATE_LOW_REG		USARTD0.BAUDCTRLA
-#define	UART_CONTROL_REG		USARTD0.CTRLB
+#define	BAUD_RATE_LOW_REG		USARTE0.BAUDCTRLA
+#define	UART_CONTROL_REG		USARTE0.CTRLB
 #define	ENABLE_TRANSMITTER_BIT		USART_TXEN_bp
 #define	ENABLE_RECEIVER_BIT		USART_RXEN_bp
-#define	UART_STATUS_REG			USARTD0.STATUS
+#define	UART_STATUS_REG			USARTE0.STATUS
 #define	TRANSMIT_COMPLETE_BIT		USART_TXCIF_bp
 #define	DATA_REG_EMPTY_BIT		USART_DREIF_bp
 #define	RECEIVE_COMPLETE_BIT		USART_RXCIF_bp
-#define	UART_DATA_REG			USARTD0.DATA
+#define	UART_DATA_REG			USARTE0.DATA
 
 
 #if defined(__AVR_ATxmega128A1__)

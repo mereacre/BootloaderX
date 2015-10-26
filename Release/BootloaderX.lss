@@ -716,9 +716,9 @@ Disassembly of section .text:
    60528:	80 91 cc 01 	lds	r24, 0x01CC
    6052c:	87 7f       	andi	r24, 0xF7	; 247
    6052e:	80 93 cc 01 	sts	0x01CC, r24
-   60532:	80 91 64 06 	lds	r24, 0x0664
+   60532:	80 91 84 06 	lds	r24, 0x0684
    60536:	80 61       	ori	r24, 0x10	; 16
-   60538:	80 93 64 06 	sts	0x0664, r24
+   60538:	80 93 84 06 	sts	0x0684, r24
    6053c:	a2 d1       	rcall	.+836    	; 0x60882 <initbootuart>
    6053e:	c0 e0       	ldi	r28, 0x00	; 0
    60540:	d0 e0       	ldi	r29, 0x00	; 0
@@ -1155,13 +1155,13 @@ Disassembly of section .text:
    60880:	fa cf       	rjmp	.-12     	; 0x60876 <nvm_eeprom_erase_bytes_in_all_pages>
 
 00060882 <initbootuart>:
-   60882:	e0 e6       	ldi	r30, 0x60	; 96
+   60882:	e0 e8       	ldi	r30, 0x80	; 128
    60884:	f6 e0       	ldi	r31, 0x06	; 6
    60886:	81 81       	ldd	r24, Z+1	; 0x01
    60888:	88 60       	ori	r24, 0x08	; 8
    6088a:	81 83       	std	Z+1, r24	; 0x01
    6088c:	e0 ea       	ldi	r30, 0xA0	; 160
-   6088e:	f9 e0       	ldi	r31, 0x09	; 9
+   6088e:	fa e0       	ldi	r31, 0x0A	; 10
    60890:	8c e0       	ldi	r24, 0x0C	; 12
    60892:	86 83       	std	Z+6, r24	; 0x06
    60894:	88 e1       	ldi	r24, 0x18	; 24
@@ -1169,20 +1169,20 @@ Disassembly of section .text:
    60898:	08 95       	ret
 
 0006089a <sendchar>:
-   6089a:	80 93 a0 09 	sts	0x09A0, r24
-   6089e:	80 91 a1 09 	lds	r24, 0x09A1
+   6089a:	80 93 a0 0a 	sts	0x0AA0, r24
+   6089e:	80 91 a1 0a 	lds	r24, 0x0AA1
    608a2:	86 ff       	sbrs	r24, 6
    608a4:	fc cf       	rjmp	.-8      	; 0x6089e <sendchar+0x4>
-   608a6:	80 91 a1 09 	lds	r24, 0x09A1
+   608a6:	80 91 a1 0a 	lds	r24, 0x0AA1
    608aa:	80 64       	ori	r24, 0x40	; 64
-   608ac:	80 93 a1 09 	sts	0x09A1, r24
+   608ac:	80 93 a1 0a 	sts	0x0AA1, r24
    608b0:	08 95       	ret
 
 000608b2 <recchar>:
-   608b2:	80 91 a1 09 	lds	r24, 0x09A1
+   608b2:	80 91 a1 0a 	lds	r24, 0x0AA1
    608b6:	87 ff       	sbrs	r24, 7
    608b8:	fc cf       	rjmp	.-8      	; 0x608b2 <recchar>
-   608ba:	80 91 a0 09 	lds	r24, 0x09A0
+   608ba:	80 91 a0 0a 	lds	r24, 0x0AA0
    608be:	08 95       	ret
 
 000608c0 <_exit>:

@@ -224,7 +224,7 @@ int main(void)
    PROGPORT |= (1<<PROG_NO); // Enable pull-up on PROG_NO line on PROGPORT.
    
    /* Branch to bootloader or application code? */
-   if( /*!(PROGPIN & (1<<PROG_NO))*/1 ) // If PROGPIN is pulled low, enter programmingmode.
+   if( /*!(PROGPIN & (1<<PROG_NO))*/1 ) // If PROGPIN is pulled low, enter programming mode.
    {
       initbootuart(); // Initialize UART.
 
