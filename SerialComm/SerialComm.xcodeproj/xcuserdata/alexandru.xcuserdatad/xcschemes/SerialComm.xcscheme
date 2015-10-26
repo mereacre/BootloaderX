@@ -64,7 +64,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/dev/tty.usbserial-FTWOHPEA"
+            argument = "/dev/tty.SLAB_USBtoUART"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
