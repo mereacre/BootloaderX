@@ -13,9 +13,9 @@
 
 typedef struct HEX {
     unsigned char len;
-    unsigned short address;
+    unsigned long address;
     unsigned char type;
-    unsigned int extendedaddress;
+    unsigned long extendedaddress;
     std::vector<unsigned char> data;
     unsigned char crc;
 }HEX;

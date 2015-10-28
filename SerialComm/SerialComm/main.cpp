@@ -65,19 +65,20 @@ ssize_t ReadSeriaData(unsigned short offset, int nBytes)
     
     return bytesRead;
 }
-int SetFlashAddress(unsigned int address)
+int SetFlashAddress(unsigned long address)
 {
     ssize_t nRecBytes = 0;
     
-    if(address>LIMIT_BASE_ADDRESS) {
-        printf("Address %X exceeds the limit\n", address);
+    if(address>=LIMIT_BASE_ADDRESS) {
+        printf("Address %lX exceeds the limit\n", address);
         return 0;
     }
-    gSendBuf[0] = 0x41;  // Character "A"
-    gSendBuf[1] = (unsigned char) ((address>>8) & 0xFF);
-    gSendBuf[2] = (unsigned char) (address & 0xFF);
+    gSendBuf[0] = 0x48;  // Character "H"
+    gSendBuf[1] = (unsigned char) ((address>>16) & 0xFF);
+    gSendBuf[2] = (unsigned char) (address>>8 & 0xFF);
+    gSendBuf[3] = (unsigned char) (address & 0xFF);
     
-    WriteToPort(&gftHandle, 3, &gSendBuf[0]);
+    WriteToPort(&gftHandle, 4, &gSendBuf[0]);
     nRecBytes = ReadSeriaData(0, MAX_BUF_SIZE);
     
     if (nRecBytes!=1 || gRecBuf[0]!=0x0D) {
@@ -88,7 +89,7 @@ int SetFlashAddress(unsigned int address)
     return 1;
 }
 
-ssize_t ReadFlashPage(unsigned int address, unsigned short byteCount)
+ssize_t ReadFlashPage(unsigned long address, unsigned short byteCount)
 {
     ssize_t nRecBytes = 0;
     unsigned short byteCountRead = 0;
@@ -118,7 +119,7 @@ ssize_t ReadFlashPage(unsigned int address, unsigned short byteCount)
     return byteCountRead;
 }
 
-int WriteFlashPage(unsigned int address, unsigned short byteCount, unsigned char *dataBuf)
+int WriteFlashPage(unsigned long address, unsigned short byteCount, unsigned char *dataBuf)
 {
     ssize_t nRecBytes = 0;
     
@@ -255,40 +256,45 @@ int main(int argc, const char * argv[]) {
         unsigned short blkSize = GetDeviceBlockSize();
         printf("[Block size]: %d\n", blkSize);
         
-        unsigned char loadF = 0x01;
+        //unsigned char loadF = 0x01;
         
         if (LoadHexFile(hexFilePath, &hexFileData) && cmdType==1) {
             printf("[Hex File]: %s opened\n", hexFilePath);
             
             unsigned char dataBuf[PAGE_SIZE_BYTES];
             unsigned char *memBuf = NULL, *prevMemBuf = NULL;
-            unsigned int baseAddress = 0x00, memSize = 0x00;
-            unsigned int prevAddr = 0x00;
+            unsigned long baseAddress = 0x00, memSize = 0x00, extendedAddress = 0x00, writeAddress = 0x00;
+            unsigned long prevAddr = 0x00;
             
             memset(&dataBuf[0], 0xFF, PAGE_SIZE_BYTES);
             
             for (int idx=0; idx<hexFileData.size(); idx++) {
                 HEX hdata =hexFileData[idx];
                 
+                writeAddress = extendedAddress + hdata.address;
+                
                 if (hdata.type==0x02) {
-                    printf("Detected extended address %X\n", hdata.extendedaddress);
-                } else if (!hdata.type) {
-                    if (hdata.address && hdata.address<prevAddr) {
-                        printf("Addresses are not in sequence\n");
-                        printf("Address %X\n", hdata.address);
-                        break;
-                    } else if (hdata.address>prevAddr) {
-                        printf("Gap in the address %X\n", hdata.address);
-                        break;
-                    } else prevAddr = hdata.address+hdata.len;
                     
-                    memBuf = (unsigned char*)realloc(prevMemBuf, hdata.address+hdata.len);
+                    printf("Detected extended address %lX\n", hdata.extendedaddress);
+                    extendedAddress = hdata.extendedaddress;
+                    
+                } else if (!hdata.type) {
+                    if (writeAddress && writeAddress<prevAddr) {
+                        printf("Addresses are not in sequence\n");
+                        printf("Address %lX\n", writeAddress);
+                        break;
+                    } else if (writeAddress>prevAddr) {
+                        printf("Gap in the address %lX\n", writeAddress);
+                        break;
+                    } else prevAddr = writeAddress+hdata.len;
+                    
+                    memBuf = (unsigned char*)realloc(prevMemBuf, writeAddress+hdata.len);
                     
                     if(memBuf!=NULL) {
                         prevMemBuf = memBuf;
-                        memcpy(memBuf+hdata.address, hdata.data.data(), hdata.len);
+                        memcpy(memBuf+writeAddress, hdata.data.data(), hdata.len);
                         
-                        memSize = hdata.address+hdata.len;
+                        memSize = writeAddress+hdata.len;
                     } else {
                         printf("Couldn't allocate memory for hex data\n");
                         if(prevMemBuf!=NULL) free(prevMemBuf);
@@ -300,10 +306,10 @@ int main(int argc, const char * argv[]) {
                         break;
                     } else {
                         int pageIdx = 0;
-                        printf("[Generating]: memory size %d, number of pages %d and remainder %d\n", memSize, memSize/PAGE_SIZE_BYTES, memSize %PAGE_SIZE_BYTES);
-                        printf("[At base address]: %X\n", baseAddress);
+                        printf("[Generating]: memory size %lu, number of pages %lu and remainder %lu\n", memSize, memSize/PAGE_SIZE_BYTES, memSize %PAGE_SIZE_BYTES);
+                        printf("[At base address]: %lX\n", baseAddress);
                         for (pageIdx=0; pageIdx<memSize/PAGE_SIZE_BYTES; pageIdx++) {
-                            printf("Writing page %d at address %X...\n", pageIdx+1, baseAddress);
+                            printf("Writing page %d at address %lX...\n", pageIdx+1, baseAddress);
                             if (WriteFlashPage(baseAddress>>1, PAGE_SIZE_BYTES, memBuf+pageIdx*PAGE_SIZE_BYTES)) {
                                 nRecBytes = ReadFlashPage(baseAddress>>1, PAGE_SIZE_BYTES);
                                 if (!memcmp(memBuf+pageIdx*PAGE_SIZE_BYTES, gRecBuf, PAGE_SIZE_BYTES) && nRecBytes==PAGE_SIZE_BYTES)
@@ -319,7 +325,7 @@ int main(int argc, const char * argv[]) {
                             baseAddress += PAGE_SIZE_BYTES;
                         }
                         
-                        printf("Writing page %d at address %X...\n", pageIdx+1, baseAddress);
+                        printf("Writing page %d at address %lX...\n", pageIdx+1, baseAddress);
                         if (WriteFlashPage(baseAddress>>1, memSize % PAGE_SIZE_BYTES, memBuf+pageIdx*PAGE_SIZE_BYTES)) {
                             nRecBytes = ReadFlashPage(baseAddress>>1, memSize % PAGE_SIZE_BYTES);
                             if (!memcmp(memBuf+pageIdx*PAGE_SIZE_BYTES, gRecBuf, memSize % PAGE_SIZE_BYTES) && nRecBytes==memSize % PAGE_SIZE_BYTES)
